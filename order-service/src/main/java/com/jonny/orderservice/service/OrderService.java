@@ -1,6 +1,5 @@
 package com.jonny.orderservice.service;
 
-import com.jonny.orderservice.client.InventoryClient;
 import com.jonny.orderservice.dto.InventoryResponse;
 import com.jonny.orderservice.dto.OrderLineItemsDto;
 import com.jonny.orderservice.dto.OrderRequest;
@@ -13,12 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreaker;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.data.domain.jaxb.SpringDataJaxb;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,24 +30,24 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final InventoryClient inventoryClient;
+    private final WebClient.Builder webClientBuilder;
     private final Resilience4JCircuitBreakerFactory circuitBreakerFactory;
     private final StreamBridge streamBridge;
-    private final ExecutorService traceableExecutorService;
+//    private final ExecutorService traceableExecutorService;
 
     public OrderResponse placeOrder(@RequestBody OrderRequest orderDto) throws Error {
-        circuitBreakerFactory.configureExecutorService(traceableExecutorService);
-        Resilience4JCircuitBreaker circuitBreaker = (Resilience4JCircuitBreaker) circuitBreakerFactory.create("inventory");
-        java.util.function.Supplier<List<InventoryResponse>> inventorySupplier = () -> orderDto.getOrderLineItemsDtoList().stream()
-                .map(lineItem -> {
-                    log.info("Making Call to Inventory Service for SkuCode {}", lineItem.getSku());
-                    return inventoryClient.checkStock(lineItem.getSku());
-                })
+        List<OrderLineItemsDto> orderLineItems = orderDto.getOrderLineItemsDtoList();
+        List<String> skus = orderLineItems.stream()
+                .map(OrderLineItemsDto::getSku)
                 .collect(Collectors.toList());
 
-        List<InventoryResponse> inventory = circuitBreaker.run(inventorySupplier, throwable -> handleErrorCase());
+//        circuitBreakerFactory.configureExecutorService(traceableExecutorService);
 
-        List<OrderLineItemsDto> orderLineItems = orderDto.getOrderLineItemsDtoList();
+        // -> Make Bean Definition?
+        Resilience4JCircuitBreaker circuitBreaker = (Resilience4JCircuitBreaker) circuitBreakerFactory.create("inventory");
+
+        Supplier<Mono<List<InventoryResponse>>> inventorySupplier = () -> checkStock(skus);
+        List<InventoryResponse> inventory = circuitBreaker.run(inventorySupplier).block();
 
         boolean allInStock = true;
         Map<String, Integer> quantityMap = new HashMap<>();
@@ -93,7 +96,22 @@ public class OrderService {
         return orderLineItems;
     }
 
-    private List<InventoryResponse> handleErrorCase() {
-        return null;
+    public Mono<List<InventoryResponse>> checkStock(List<String> skus) {
+        return webClientBuilder.build()
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("http://inventory-service/api/inventory")
+                        .queryParam("sku", skus.toArray())
+                        .build())
+                .retrieve()
+                .bodyToFlux(InventoryResponse.class)
+                .collectList();
+    }
+
+    public List<InventoryResponse> getInventoryResponse(OrderRequest orderDto) {
+        List<String> skus = orderDto.getOrderLineItemsDtoList().stream()
+                .map(OrderLineItemsDto::getSku)
+                .collect(Collectors.toList());
+
+        return checkStock(skus).block();
     }
 }
