@@ -1,0 +1,8 @@
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/com/jonny/productservice/ProductServiceApplication.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/com/jonny/productservice/repository/ProductRepository.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/com/jonny/productservice/dto/ProductRequest.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/org/example/Main.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/com/jonny/productservice/dto/ProductResponse.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/com/jonny/productservice/model/Product.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/com/jonny/productservice/controller/ProductController.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/product-service/src/main/java/com/jonny/productservice/service/ProductService.java

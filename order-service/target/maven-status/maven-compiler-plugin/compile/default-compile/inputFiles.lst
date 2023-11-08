@@ -1,0 +1,8 @@
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/OrderServiceApplication.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/controller/OrderController.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/service/OrderService.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/repository/OrderRepository.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/dto/OrderRequest.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/dto/OrderLineItemsDto.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/model/Order.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/order-service/src/main/java/com/jonny/orderservice/model/OrderLineItems.java

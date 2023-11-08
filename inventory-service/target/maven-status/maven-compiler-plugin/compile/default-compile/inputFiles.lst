@@ -1,0 +1,5 @@
+/Users/jonasw/localdocs/microservices-course/my-microservices/inventory-service/src/main/java/com/jonny/inventoryservice/controller/InventoryController.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/inventory-service/src/main/java/com/jonny/inventoryservice/model/Inventory.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/inventory-service/src/main/java/com/jonny/inventoryservice/repository/InventoryRepository.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/inventory-service/src/main/java/com/jonny/inventoryservice/InventoryServiceApplication.java
+/Users/jonasw/localdocs/microservices-course/my-microservices/inventory-service/src/main/java/com/jonny/inventoryservice/service/InventoryService.java

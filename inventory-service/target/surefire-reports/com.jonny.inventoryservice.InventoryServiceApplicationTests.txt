@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.jonny.inventoryservice.InventoryServiceApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.665 s - in com.jonny.inventoryservice.InventoryServiceApplicationTests

@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    gateway:
+      discovery.locator.enabled: true
+      routes:
+        - id: product-service-private
+          uri: lb://product-service
+          predicates:
+            - Path=/api/product
+            - Method=PUT,POST,DELETE
+          filters:
+            - RoleAuth=ADMIN
+        - id: product-service-public
+          uri: lb://product-service
+          predicates:
+            - Path=/api/product
+            - Method=GET
+        - id: order-service-private
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order
+            - Method=GET,DELETE
+          filters:
+            - RoleAuth=Admin
+        - id: order-service-public
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order
+            - Method=POST,PUT
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+
+management:
+  endpoint.gateway.enabled: true
+  endpoints.web.exposure.include: gateway

@@ -1,0 +1,5 @@
+com/jonny/inventoryservice/service/InventoryService.class
+com/jonny/inventoryservice/repository/InventoryRepository.class
+com/jonny/inventoryservice/controller/InventoryController.class
+com/jonny/inventoryservice/model/Inventory.class
+com/jonny/inventoryservice/InventoryServiceApplication.class
