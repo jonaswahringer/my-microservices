@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreaker;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.data.domain.jaxb.SpringDataJaxb;
 import org.springframework.integration.support.MessageBuilder;
@@ -20,7 +23,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -31,9 +36,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
-    private final Resilience4JCircuitBreakerFactory circuitBreakerFactory;
+    private final CircuitBreakerFactory circuitBreakerFactory;
     private final StreamBridge streamBridge;
-//    private final ExecutorService traceableExecutorService;
 
     public OrderResponse placeOrder(@RequestBody OrderRequest orderDto) throws Error {
         List<OrderLineItemsDto> orderLineItems = orderDto.getOrderLineItemsDtoList();
@@ -41,10 +45,7 @@ public class OrderService {
                 .map(OrderLineItemsDto::getSku)
                 .collect(Collectors.toList());
 
-//        circuitBreakerFactory.configureExecutorService(traceableExecutorService);
-
-        // -> Make Bean Definition?
-        Resilience4JCircuitBreaker circuitBreaker = (Resilience4JCircuitBreaker) circuitBreakerFactory.create("inventory");
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("inventory");
 
         Supplier<Mono<List<InventoryResponse>>> inventorySupplier = () -> checkStock(skus);
         List<InventoryResponse> inventory = circuitBreaker.run(inventorySupplier).block();
@@ -88,30 +89,22 @@ public class OrderService {
                 .build();
     }
 
-    private OrderLineItems mapDtoToEntity(OrderLineItemsDto orderLineItemsDto) {
-        OrderLineItems orderLineItems = new OrderLineItems();
-        orderLineItems.setPrice(orderLineItemsDto.getPrice());
-        orderLineItems.setSku(orderLineItemsDto.getSku());
-        orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
-        return orderLineItems;
-    }
-
     public Mono<List<InventoryResponse>> checkStock(List<String> skus) {
         return webClientBuilder.build()
                 .get()
-                .uri(uriBuilder -> uriBuilder.path("http://inventory-service/api/inventory")
-                        .queryParam("sku", skus.toArray())
+                .uri(uriBuilder -> uriBuilder.path("lb://inventory-service/api/inventory")
+                        .queryParam("skuCodes", skus.toArray())
                         .build())
                 .retrieve()
                 .bodyToFlux(InventoryResponse.class)
                 .collectList();
     }
 
-    public List<InventoryResponse> getInventoryResponse(OrderRequest orderDto) {
-        List<String> skus = orderDto.getOrderLineItemsDtoList().stream()
-                .map(OrderLineItemsDto::getSku)
-                .collect(Collectors.toList());
-
-        return checkStock(skus).block();
+    private OrderLineItems mapDtoToEntity(OrderLineItemsDto orderLineItemsDto) {
+        OrderLineItems orderLineItems = new OrderLineItems();
+        orderLineItems.setPrice(orderLineItemsDto.getPrice());
+        orderLineItems.setSku(orderLineItemsDto.getSku());
+        orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
+        return orderLineItems;
     }
 }

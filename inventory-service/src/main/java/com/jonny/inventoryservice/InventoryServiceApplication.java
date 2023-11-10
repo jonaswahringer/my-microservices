@@ -18,16 +18,18 @@ public class InventoryServiceApplication {
 	@Bean
 	public CommandLineRunner loadData(InventoryRepository inventoryRepository) {
 		return args -> {
-				Inventory inventory = new Inventory();
-				inventory.setSkuCode("IPHONE 13");
-				inventory.setQuantity(10);
-
 				Inventory inventory1 = new Inventory();
 				inventory1.setSkuCode("IPHONE 13");
 				inventory1.setQuantity(10);
+				inventory1.setDeliveryInfo("No further Info provided.");
 
-				inventoryRepository.save(inventory);
+				Inventory inventory2 = new Inventory();
+				inventory2.setSkuCode("IPHONE 14");
+				inventory2.setQuantity(10);
+				inventory2.setDeliveryInfo("Deliveries from this supplier typically take up to 2 months.");
+
 				inventoryRepository.save(inventory1);
+				inventoryRepository.save(inventory2);
 		};
 	}
 
